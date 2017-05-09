@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <script type="text/javascript" src="src/Mp4FormatCheck.js"></script>
+    </head>
+
+    <body>
+        <input type="file" id="input" />
+
+        <script type="text/javascript">
+
+            var inputElement = document.getElementById("input");
+            inputElement.addEventListener("change", handleFiles, false);
+            
+            function handleFiles() {
+                file = this.files[0];
+
+                Mp4FormatCheck.findFormats(file, function(_formatsFound) {
+                    console.log(Mp4FormatCheck.containsH264Format(_formatsFound));
+                });
+            };
+        </script>        
+    </body>
+
+</html>
