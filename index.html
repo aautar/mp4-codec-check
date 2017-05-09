@@ -2,6 +2,7 @@
 <html>
 
     <head>
+        <script type="text/javascript" src="src/Mp4FormatCheck.js"></script>
     </head>
 
     <body>
@@ -9,144 +10,15 @@
 
         <script type="text/javascript">
 
-            function blobToArrayBuffer(_blob)  {
-                return new Promise(function(_resolve, _reject) {
-                    var fileReader = new FileReader();
-                    fileReader.onload = function() {
-                        _resolve(fileReader.result);
-                    };
-
-                    fileReader.readAsArrayBuffer(_blob);
-                });
-            };
-
-
-            file = null;
-            filePointer = 0;
-
             var inputElement = document.getElementById("input");
             inputElement.addEventListener("change", handleFiles, false);
-
-            function stuffInt64BytesIntoNumber(_arrayBuffer)
-            {
-                // get a DataView over the ArrayBuffer
-                var dv = new DataView(_arrayBuffer);
-
-                // read bytes from DataView into array
-                var bytes = [];
-                for(let i=0; i<8; i++) {
-                    bytes.push( dv.getUint8(i) );
-                }
-
-                // turn each byte into a padded, binary string
-                var binaryStringsArr = bytes.map(function(b) { 
-                    return b.toString(2).padStart(8, "0");
-                });
-
-                // concat into binary string
-                var binaryString = binaryStringsArr.join('');
-
-                // parse as Number (accurate up to 52 bits, precision loss after that)
-                return parseInt(binaryString, 2);
-            };
-
-            function readStringFromDataView(_dataView, _startIndex, _length)
-            {
-                var result = "";
-                for(var i=0; i<_length; i++) {
-                    result += String.fromCharCode(_dataView.getInt8(_startIndex+i));
-                }
-
-                return result;
-            }
-
-
-            function readStsdAtom(_atomSize)
-            {
-                var atomDataBlob = file.slice(filePointer, filePointer+(_atomSize-8));
-                return new Promise(function(_resolve, _reject) {
-                    var fileReader = new FileReader();
-                    fileReader.onload = function() {
-                        var dv = new DataView(fileReader.result);
-
-                        var version = dv.getUint8(0);
-                        var fb1 = dv.getUint8(1);
-                        var fb2 = dv.getUint8(2);
-                        var fb3 = dv.getUint8(3);
-                        var count = dv.getUint32(4, false);
-
-                        var subStart = 8;
-                        for(var i=0; i<count; i++) {
-                            var len = dv.getUint32(subStart, false);
-                            var type = readStringFromDataView(dv, subStart+4, 4);
-                            var info = readStringFromDataView(dv, subStart+8, len-8);
-                            var desc = readStringFromDataView(dv, subStart+len-8, 8);
-
-                            console.log(type);
-                            console.log(info);
-
-                            subStart += len;
-
-                        }
-
-                        _resolve({});
-                    };
-
-                    fileReader.readAsArrayBuffer(atomDataBlob);                    
-                });
-            }
-
-            function readBlob(_blob)
-            {
-                blobToArrayBuffer(_blob).then(function(_arrayBuffer) {
-                    var totalSize = new DataView(_arrayBuffer).getUint32(0, false);
-                    var boxType = readStringFromDataView(new DataView(_arrayBuffer), 4, 4);
-
-                    console.log('boxType = ' + boxType);                    
-                    console.log('totalSize = ' + totalSize);
-
-                    if(boxType === 'stsd') { // sample description atom
-                        readStsdAtom(totalSize).then(function() { 
-                            filePointer += totalSize-8;
-                            readFileSlice();
-                        });
-                    } else if(boxType === 'moov' || boxType === 'trak' || boxType === 'mdia' || boxType === 'minf' || boxType === 'stbl') { // containers
-                        readFileSlice();                                                               
-                    } else { // skip data
-
-                        if(totalSize === 1) {
-                            var extBlob = file.slice(filePointer, filePointer+8);
-                            filePointer+=8;
-                            blobToArrayBuffer(extBlob).then(function(_extBlobArrayBuffer) {
-                                var extSize = stuffInt64BytesIntoNumber(_extBlobArrayBuffer);
-                                filePointer += extSize;
-                            });                          
-                        }
-
-                        filePointer += totalSize-8;
-                        readFileSlice();
-                    }
-
-                });
-            };
-
-            function readFileSlice()
-            {
-                console.log('filePointer = ' + filePointer);
-
-                var data = file.slice(filePointer, filePointer+8);
-                filePointer += 8;
-                if(data.size < 8) {
-                    return;
-                }
-
-                readBlob(data);
-            };
-
+            
             function handleFiles() {
                 file = this.files[0];
-                filePointer = 0;
-                readFileSlice();
+
+                Mp4FormatCheck.findFormats(file, function(_formatsFound) {
+                    console.log(_formatsFound);
+                });
             };
         </script>        
     </body>
