@@ -83,7 +83,7 @@ Mp4FormatCheck = (function () {
                         var desc = thisChecker.readStringFromDataView(dv, subStart+len-8, 8);
                         subStart += len;
 
-                        thisChecker.formatTypesFound.push({"type": type});
+                        thisChecker.formatTypesFound.push({ "type": type.toLowerCase() });
                     }
 
                     _resolve();
@@ -159,6 +159,20 @@ Mp4FormatCheck = (function () {
             c.run(function(_formats) {
                 _onFindComplete(_formats);
             });
+        },
+
+        /**
+         * @param {Array} _formats
+         * @return {Boolean}
+         */
+        containsH264Format: function(_formats) {
+            for(let i=0; i<_formats.length; i++) {
+                if(_formats[i].type === 'h264' || _formats[i].type === 'avc1') {
+                    return true;
+                }
+            }
+
+            return false;
         }
     };
 })();

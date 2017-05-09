@@ -17,7 +17,7 @@
                 file = this.files[0];
 
                 Mp4FormatCheck.findFormats(file, function(_formatsFound) {
-                    console.log(_formatsFound);
+                    console.log(Mp4FormatCheck.containsH264Format(_formatsFound));
                 });
             };
         </script>        
