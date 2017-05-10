@@ -1,0 +1,8 @@
+{
+  "name": "mp4-format-check",
+  "version": "1.0.0",
+  "main": "src/Mp4FormatCheck.js",
+  "repository": "https://github.com/aautar/mp4-format-check.git",
+  "author": "Avishkar Autar <aautar@digital-radiation.com>",
+  "license": "MIT"
+}
