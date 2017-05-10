@@ -7,12 +7,18 @@ Mp4FormatCheck = (function () {
         this.filePointer = 0;
         this.formatTypesFound = [];
 
+        /**
+         * @callback OnFinish
+         * @param {OnFinish} _onFinish
+         */
         this.run = function(_onFinish) {
             thisChecker.readNextFileSlice(_onFinish);
         };
 
         /**
+         * @callback OnFinish
          * @param {File} _file
+         * @param {OnFinish} _onFinish
          */
         this.readNextFileSlice = function(_onFinish) {         
             var data = _file.slice(thisChecker.filePointer, thisChecker.filePointer+8);
@@ -25,7 +31,10 @@ Mp4FormatCheck = (function () {
         };    
 
         /**
+         * @callback OnFinish
+         * 
          * @param {Blob} _blob
+         * @param {OnFinish} _onFinish
          */
         this.readBlob = function(_blob, _onFinish) {
             thisChecker.blobToArrayBuffer(_blob).then(function(_arrayBuffer) {
@@ -152,7 +161,9 @@ Mp4FormatCheck = (function () {
     return {
 
         /**
+         * @callback OnFindComplete
          * @param {File} _file
+         * @param {OnFindComplete} _onFindComplete
          */
         findFormats: function(_file, _onFindComplete) {
             var c = new checker(_file);
