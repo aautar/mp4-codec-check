@@ -41,9 +41,6 @@ Mp4FormatCheck = (function () {
                 var totalSize = new DataView(_arrayBuffer).getUint32(0, false);
                 var boxType = thisChecker.readStringFromDataView(new DataView(_arrayBuffer), 4, 4);
 
-                //console.log('boxType = ' + boxType);                    
-                //console.log('totalSize = ' + totalSize);
-
                 if(boxType === 'stsd') { // sample description atom
                     var atomDataBlob = _file.slice(thisChecker.filePointer, thisChecker.filePointer+(totalSize-8));
                     thisChecker.readStsdAtom(atomDataBlob).then(function() {
